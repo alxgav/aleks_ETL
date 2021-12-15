@@ -1,0 +1,22 @@
+{
+    "film_work_setting": {
+        "dsn": {
+            "dbname": "movies",
+            "user": "postgres",
+            "password": 1234,
+            "host": "127.0.0.1",
+            "port": 5432
+        },
+        "es": {
+            "host": "http://127.0.0.1:9200",
+            "index": "movies"
+        },
+        "sql_query_person": "SELECT id, updated_at FROM content.person where updated_at > %s ORDER BY updated_at ;",
+        "sql_query_genre": "SELECT id, updated_at \nFROM content.genre \nwhere updated_at > %s\nORDER BY updated_at ;",
+        "sql_query_fw": "select id, updated_at\nfrom content.film_work fw \nwhere updated_at > %s\nORDER BY updated_at ;",
+        "sql_query_genre_film_work": "SELECT fw.id, fw.updated_at \nFROM content.film_work fw \nLEFT JOIN content.genre_film_work gfw  ON gfw.filmwork_id = fw.id \nWHERE gfw.genre_id IN %s ORDER BY fw.updated_at;",
+        "sql_query_person_film_work": "SELECT fw.id, fw.updated_at FROM content.film_work fw LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id WHERE pfw.person_id IN %s ORDER BY fw.updated_at ; ",
+        "sql_result": "SELECT\n    fw.id as id,\n    fw.rating as imdb_rating,\n    ARRAY_AGG(DISTINCT g.name ) AS genre,\n    fw.title as title,\n    fw.description as description,\n    ARRAY_AGG(DISTINCT p.full_name )\n        FILTER ( WHERE pfw.role = 'director' ) AS director,\n    ARRAY_AGG(DISTINCT p.full_name)\n        FILTER ( WHERE pfw.role = 'actor' ) AS actors_names,\n    ARRAY_AGG(DISTINCT p.full_name)\n        FILTER ( WHERE pfw.role = 'writer' ) AS writers_names,\n   json_agg(json_build_object('id', p.id, 'name',p.full_name))\n        FILTER ( WHERE pfw.role = 'actor' )  AS actors,\n    json_agg(json_build_object('id', p.id, 'name',p.full_name))\n        FILTER ( WHERE pfw.role = 'writer' ) AS writers\nFROM content.film_work fw\nLEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id\nLEFT join content.person p ON p.id = pfw.person_id\nLEFT JOIN content.genre_film_work gfw ON gfw.filmwork_id = fw.id\nLEFT JOIN content.genre g ON g.id = gfw.genre_id\n WHERE fw.id IN %s \ngroup by fw.id ;"
+    },
+    "state": "2021-12-12 16:18:34"
+}
